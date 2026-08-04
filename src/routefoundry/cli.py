@@ -11,6 +11,15 @@ from rich.console import Console
 from rich.table import Table
 
 from routefoundry import __version__
+from routefoundry.autopilot import (
+    DEFAULT_TIMEOUT_SECONDS,
+    AutopilotError,
+    RunProgress,
+    discover_models,
+    estimate_duration_seconds,
+    format_duration,
+    run_autopilot,
+)
 from routefoundry.demo import audit_demo, write_demo_jsonl
 from routefoundry.exporters import export_hf_chat_ui, export_human_policy
 from routefoundry.ollama import DEFAULT_BASE_URL, OllamaProfileError, profile_ollama_models
@@ -18,6 +27,7 @@ from routefoundry.optimize import audit, compile_policy
 from routefoundry.policy import SUPPORTED_OBJECTIVES, Policy, dump_policy, load_policy, route
 from routefoundry.report import write_report
 from routefoundry.schema import ValidationError, load_jsonl
+from routefoundry.tasks import TaskSuiteError, load_tasks, select_tasks
 
 app = typer.Typer(
     name="routefoundry",
@@ -465,6 +475,119 @@ def ollama_profile_command(
     console.print(
         "Condition: backend-non-resident; OS cache uncontrolled. "
         f"Residency restoration: {restore.get('status', 'unknown')}."
+    )
+
+
+@app.command("autopilot")
+def autopilot_command(
+    output: Annotated[
+        Path, typer.Option("--output", "-o", help="Where to write the observation matrix.")
+    ] = Path("out/observations.jsonl"),
+    models: Annotated[
+        str | None,
+        typer.Option("--models", help="Comma-separated model names. Default: every installed model."),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", help="Use a balanced subset of the suite (faster, less evidence)."),
+    ] = None,
+    timeout: Annotated[
+        float, typer.Option("--timeout", help="Seconds allowed per generation.")
+    ] = DEFAULT_TIMEOUT_SECONDS,
+    base_url: Annotated[str, typer.Option("--base-url", help="Ollama endpoint.")] = DEFAULT_BASE_URL,
+    resume: Annotated[
+        bool, typer.Option("--resume/--no-resume", help="Reuse completed trials from a previous run.")
+    ] = True,
+    yes: Annotated[
+        bool, typer.Option("--yes", "-y", help="Skip the duration estimate confirmation.")
+    ] = False,
+) -> None:
+    """Measure your installed Ollama models and build an observation matrix.
+
+    Runs a bundled auto-gradable suite against each model, grades every answer
+    deterministically, and writes observations that ``audit`` accepts. Nothing is pulled or
+    deleted; only models already installed are measured.
+    """
+
+    try:
+        suite = load_tasks()
+        selected_tasks = select_tasks(suite, limit=limit)
+        installed = discover_models(base_url=base_url)
+    except (OSError, TaskSuiteError, OllamaProfileError, ValueError) as exc:
+        _fail(exc)
+
+    if not installed:
+        error_console.print("[red]No models installed[/red]: Ollama reports an empty model list.")
+        raise typer.Exit(code=2)
+
+    available = {info.name for info in installed}
+    if models:
+        chosen = [name.strip() for name in models.split(",") if name.strip()]
+        missing = [name for name in chosen if name not in available]
+        if missing:
+            error_console.print(f"[red]Not installed[/red]: {', '.join(missing)}")
+            raise typer.Exit(code=2)
+    else:
+        chosen = [info.name for info in installed]
+
+    estimate = estimate_duration_seconds(len(chosen), len(selected_tasks))
+    console.print(
+        f"Measuring [bold]{len(chosen)}[/bold] models x [bold]{len(selected_tasks)}[/bold] tasks "
+        f"= {len(chosen) * len(selected_tasks)} generations."
+    )
+    console.print(
+        f"Rough estimate: [bold]{format_duration(estimate)}[/bold] "
+        "(laptop-CPU constants; a GPU fleet is much faster). Interrupting is safe: "
+        "completed work is reused on the next run."
+    )
+    if not yes and not typer.confirm("Start the run?", default=True):
+        raise typer.Exit(code=1)
+
+    def _progress(update: RunProgress) -> None:
+        mark = "[red]err[/red]" if update.error else ("[green]ok [/green]" if update.correct else "-- ")
+        console.print(
+            f"  [{update.index}/{update.total}] {mark} {update.model} "
+            f"{update.task_id} {update.latency_ms / 1000:.1f}s",
+            highlight=False,
+        )
+
+    try:
+        stats = run_autopilot(
+            chosen,
+            selected_tasks,
+            output,
+            base_url=base_url,
+            timeout=timeout,
+            resume=resume,
+            on_progress=_progress,
+        )
+    except (OSError, AutopilotError, OllamaProfileError) as exc:
+        _fail(exc)
+
+    table = Table(title="Autopilot: verifiable short-answer accuracy")
+    table.add_column("Model")
+    table.add_column("Correct", justify="right")
+    table.add_column("Accuracy", justify="right")
+    for model in chosen:
+        total = stats.per_model_total.get(model, 0)
+        correct = stats.per_model_correct.get(model, 0)
+        share = f"{correct / total:.0%}" if total else "n/a"
+        table.add_row(model, f"{correct}/{total}", share)
+    console.print(table)
+
+    console.print(
+        f"[green]Matrix written[/green] to {output.resolve()} "
+        f"({stats.measured} measured, {stats.resumed} reused, {stats.wall_seconds:.0f}s)."
+    )
+    if stats.dropped_prompts:
+        console.print(
+            f"[yellow]{len(stats.dropped_prompts)} prompt(s) dropped[/yellow] because at least one "
+            "model failed to answer; an audit needs the same prompts for every model."
+        )
+    console.print(
+        "These numbers measure verifiable short-answer accuracy on this suite and this "
+        "hardware. They say nothing about open-ended generation quality. Next: "
+        f"[bold]routefoundry audit {output}[/bold]"
     )
 
 
