@@ -1,0 +1,6 @@
+# Standalone Hugging Face Space bootstrap for the unreleased v0.1.0 package.
+# Publish the public GitHub v0.1.0 release tag before deploying this Space. After the
+# matching PyPI release exists, replace the direct reference with `routefoundry==0.1.0`.
+# This public URL needs no token and must never be changed to a credential-bearing URL.
+routefoundry @ git+https://github.com/RitikPatill/routefoundry.git@v0.1.0
+gradio==6.22.0
