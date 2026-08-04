@@ -32,6 +32,10 @@ limits: [benchmarks/laptop-4model-suite-v1](benchmarks/laptop-4model-suite-v1/).
 
 Your fleet is not this fleet, which is the point — run it and find out.
 
+<p align="center">
+  <img src="assets/autopilot-demo.svg" alt="routefoundry autopilot measuring two local models and reporting per-model accuracy" width="100%">
+</p>
+
 ```bash
 routefoundry autopilot --limit 12      # measure your installed models (minutes, not seconds)
 ```

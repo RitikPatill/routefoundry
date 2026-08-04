@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 470" width="860" height="470" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" role="img" aria-label="Terminal recording of routefoundry autopilot measuring two local models: gemma:2b scores 1 of 4, llama3.2:3b scores 3 of 4.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#11131a"/>
+      <stop offset="1" stop-color="#0c0e14"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="860" height="470" rx="10" fill="url(#bg)"/>
+  <rect x="0" y="0" width="860" height="34" rx="10" fill="#191c25"/>
+  <rect x="0" y="24" width="860" height="10" fill="#191c25"/>
+  <circle cx="20" cy="17" r="5.5" fill="#ff5f57"/>
+  <circle cx="39" cy="17" r="5.5" fill="#febc2e"/>
+  <circle cx="58" cy="17" r="5.5" fill="#28c840"/>
+  <text x="430" y="21" fill="#6b7280" font-size="12" text-anchor="middle">routefoundry — measuring local models</text>
+
+  <g font-size="13.5">
+    <text x="22" y="62"><tspan fill="#28c840">$</tspan><tspan fill="#e6e8ee" xml:space="preserve"> routefoundry autopilot --limit 4 --models gemma:2b,llama3.2:3b</tspan></text>
+
+    <text x="22" y="92"  fill="#c3c7d1">Measuring 2 models x 4 tasks = 8 generations.</text>
+    <text x="22" y="112" fill="#7c8394">Rough estimate: 2 min (laptop-CPU constants; a GPU fleet is much faster).</text>
+    <text x="22" y="132" fill="#7c8394">Interrupting is safe: completed work is reused on the next run.</text>
+
+    <text x="22" y="162" xml:space="preserve"><tspan fill="#6b7280">  [1/8] </tspan><tspan fill="#6b7280">--  </tspan><tspan fill="#c3c7d1">gemma:2b     math-001      2.1s</tspan></text>
+    <text x="22" y="182" xml:space="preserve"><tspan fill="#6b7280">  [2/8] </tspan><tspan fill="#6b7280">--  </tspan><tspan fill="#c3c7d1">gemma:2b     extract-001   1.9s</tspan></text>
+    <text x="22" y="202" xml:space="preserve"><tspan fill="#6b7280">  [3/8] </tspan><tspan fill="#28c840">ok  </tspan><tspan fill="#c3c7d1">gemma:2b     class-001     2.8s</tspan></text>
+    <text x="22" y="222" xml:space="preserve"><tspan fill="#6b7280">  [4/8] </tspan><tspan fill="#6b7280">--  </tspan><tspan fill="#c3c7d1">gemma:2b     code-001      2.6s</tspan></text>
+    <text x="22" y="242" xml:space="preserve"><tspan fill="#6b7280">  [5/8] </tspan><tspan fill="#6b7280">--  </tspan><tspan fill="#c3c7d1">llama3.2:3b  math-001      2.6s</tspan></text>
+    <text x="22" y="262" xml:space="preserve"><tspan fill="#6b7280">  [6/8] </tspan><tspan fill="#28c840">ok  </tspan><tspan fill="#c3c7d1">llama3.2:3b  extract-001   2.5s</tspan></text>
+    <text x="22" y="282" xml:space="preserve"><tspan fill="#6b7280">  [7/8] </tspan><tspan fill="#28c840">ok  </tspan><tspan fill="#c3c7d1">llama3.2:3b  class-001     1.8s</tspan></text>
+    <text x="22" y="302" xml:space="preserve"><tspan fill="#6b7280">  [8/8] </tspan><tspan fill="#28c840">ok  </tspan><tspan fill="#c3c7d1">llama3.2:3b  code-001      2.0s</tspan></text>
+
+    <g fill="#8b93a7">
+      <text x="22" y="336" xml:space="preserve">┌─────────────┬─────────┬──────────┐</text>
+      <text x="22" y="354" xml:space="preserve">│ <tspan fill="#e6e8ee">Model      </tspan> │ <tspan fill="#e6e8ee">Correct</tspan> │ <tspan fill="#e6e8ee">Accuracy</tspan> │</text>
+      <text x="22" y="372" xml:space="preserve">├─────────────┼─────────┼──────────┤</text>
+      <text x="22" y="390" xml:space="preserve">│ <tspan fill="#c3c7d1">gemma:2b   </tspan> │     <tspan fill="#c3c7d1">1/4</tspan> │      <tspan fill="#febc2e">25%</tspan> │</text>
+      <text x="22" y="408" xml:space="preserve">│ <tspan fill="#c3c7d1">llama3.2:3b</tspan> │     <tspan fill="#c3c7d1">3/4</tspan> │      <tspan fill="#28c840">75%</tspan> │</text>
+      <text x="22" y="426" xml:space="preserve">└─────────────┴─────────┴──────────┘</text>
+    </g>
+
+    <text x="22" y="454" font-size="12.5" fill="#7c8394">Matrix written to out/observations.jsonl (8 measured, 34s). Next: routefoundry audit</text>
+  </g>
+</svg>
