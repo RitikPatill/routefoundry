@@ -147,8 +147,13 @@ def grade_exact_number(response: str, expected: str, *, tolerance: str | None = 
 def grade_exact_string(response: str, expected: str, *, _arg: str | None = None) -> GradeResult:
     """Grade a short string answer, tolerant of case, wrapping, and edge punctuation.
 
-    A multi-line response is accepted when its final non-empty line matches, which covers
-    models that restate the question before answering.
+    Models state a short answer in one of three shapes: alone, on the first line followed
+    by an explanation, or after working through the problem. All three are accepted, and
+    the match must consume a whole line: a line that merely *contains* the expected value
+    ("not negative", "either positive or negative") earns nothing.
+
+    A free-form sentence such as "The sentiment is negative" is still scored incorrect.
+    These prompts specify their answer format, so following it is part of what is measured.
     """
 
     cleaned = normalise_response(response)
@@ -163,8 +168,11 @@ def grade_exact_string(response: str, expected: str, *, _arg: str | None = None)
         return GradeResult(1.0, True, "exact match")
 
     lines = [line for line in cleaned.splitlines() if line.strip()]
-    if lines and _canonical(lines[-1]) == target:
-        return GradeResult(1.0, True, "final-line match")
+    if lines:
+        if _canonical(lines[0]) == target:
+            return GradeResult(1.0, True, "first-line match")
+        if _canonical(lines[-1]) == target:
+            return GradeResult(1.0, True, "final-line match")
     return GradeResult(0.0, False, "string mismatch")
 
 

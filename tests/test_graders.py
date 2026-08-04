@@ -82,10 +82,21 @@ class TestExactString:
     def test_final_line_match_for_chatty_models(self) -> None:
         assert grade_exact_string("Sure! Here it is:\npositive", "positive").correct
 
+    def test_first_line_match_when_the_model_answers_then_explains(self) -> None:
+        # Observed with gemma:2b: the correct label, then an unprompted justification.
+        # Scoring this wrong would penalise verbosity rather than capability.
+        response = "Negative.\n\nThe message indicates the package arrived late and was damaged."
+        assert grade_exact_string(response, "negative").correct
+
     def test_rejects_wrong_label_and_label_lists(self) -> None:
         assert not grade_exact_string("negative", "positive").correct
         # Listing every option must not earn credit.
         assert not grade_exact_string("positive, negative, neutral", "positive").correct
+
+    def test_rejects_a_line_that_merely_contains_the_label(self) -> None:
+        # A whole-line match is required, so a negated or hedged line earns nothing.
+        assert not grade_exact_string("not negative\nstill unsure", "negative").correct
+        assert not grade_exact_string("either positive or negative", "negative").correct
 
     def test_empty_expected_is_a_configuration_error(self) -> None:
         with pytest.raises(GraderError):
