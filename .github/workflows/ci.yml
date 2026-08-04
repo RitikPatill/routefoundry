@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.11"
+          - os: macos-14
+            python: "3.11"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: uv sync --extra dev --locked
+      - run: uv run python scripts/secret_scan.py
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src/routefoundry
+      - run: uv run pytest --cov --cov-report=term-missing --cov-report=xml
+
+  demo-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.11"
+      - run: uv sync --extra dev --locked
+      - run: uv run routefoundry demo --output out/demo
+      - name: Build wheel and source distribution
+        run: uv build
+      - name: Check distribution metadata and source contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run twine check dist/*
+          sdist=(dist/*.tar.gz)
+          test "${#sdist[@]}" -eq 1
+          uv run python scripts/release_gate.py --sdist "${sdist[0]}"
+      - name: Smoke-test clean wheel and source-distribution installs
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheel=(dist/*.whl)
+          sdist=(dist/*.tar.gz)
+          test "${#wheel[@]}" -eq 1
+          test "${#sdist[@]}" -eq 1
+
+          for kind in wheel sdist; do
+            if [[ "$kind" == "wheel" ]]; then
+              artifact="${wheel[0]}"
+            else
+              artifact="${sdist[0]}"
+            fi
+            environment="$RUNNER_TEMP/routefoundry-$kind-smoke"
+            uv venv --python 3.11 "$environment"
+            uv pip install --python "$environment/bin/python" "$artifact"
+            "$environment/bin/routefoundry" --help
+            "$environment/bin/python" -m routefoundry --help
+            "$environment/bin/routefoundry" demo \
+              --output "$RUNNER_TEMP/routefoundry-$kind-demo"
+            test -f "$RUNNER_TEMP/routefoundry-$kind-demo/summary.json"
+          done
+      - name: Upload demo and distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: routefoundry-demo-and-package
+          if-no-files-found: error
+          path: |
+            out/demo
+            dist

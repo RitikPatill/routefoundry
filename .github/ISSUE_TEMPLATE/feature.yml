@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a user problem, not only a solution.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and current workaround
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Example workload or evidence
+      description: Use synthetic or redacted examples only.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: What would success look like?
+    validations:
+      required: true
+
