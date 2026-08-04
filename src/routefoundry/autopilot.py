@@ -24,13 +24,16 @@ timeout is a property of the run, not of the model's ability.
 from __future__ import annotations
 
 import json
+import os
 import time
 from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
 import httpx
+import psutil  # type: ignore[import-untyped]
 
 from routefoundry.graders import grade
 from routefoundry.ollama import DEFAULT_BASE_URL, OllamaAPIError, OllamaProfiler
@@ -198,6 +201,39 @@ class Trial:
             "grade_reason": self.grade_reason,
             "error": self.error,
         }
+
+
+class ConcurrentRunError(AutopilotError):
+    """Raised when another run is already measuring into the same output."""
+
+
+@contextmanager
+def _run_lock(output_path: Path) -> Iterator[None]:
+    """Refuse to start when another live run owns this output.
+
+    Two concurrent runs interleave writes *and* compete for the same CPU, so every latency
+    they record is inflated. That silently produces plausible-looking numbers that are not
+    evidence of anything, which is worse than crashing.
+    """
+
+    lock = output_path.with_suffix(output_path.suffix + ".lock")
+    if lock.exists():
+        try:
+            owner = int(lock.read_text("utf-8").strip() or "0")
+        except (OSError, ValueError):
+            owner = 0
+        if owner and owner != os.getpid() and psutil.pid_exists(owner):
+            raise ConcurrentRunError(
+                f"another autopilot run (pid {owner}) is writing to {output_path.name}. "
+                "Concurrent runs corrupt timings; wait for it, or choose a different --output."
+            )
+        lock.unlink(missing_ok=True)  # stale lock from a killed run
+
+    lock.write_text(str(os.getpid()), encoding="utf-8")
+    try:
+        yield
+    finally:
+        lock.unlink(missing_ok=True)
 
 
 def trials_path_for(output_path: str | Path) -> Path:
@@ -431,6 +467,7 @@ def iter_observation_rows(path: str | Path) -> Iterator[dict[str, Any]]:
 
 
 __all__ = [
+    "ConcurrentRunError",
     "Trial",
     "trials_path_for",
     "write_observations",
