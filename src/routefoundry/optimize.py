@@ -100,6 +100,10 @@ class AuditResult:
     policy: Policy
     schema_version: str = AUDIT_SCHEMA_VERSION
     notes: tuple[str, ...] = ()
+    # Baselines that made identical assignments, grouped. On an all-local pool several
+    # named strategies collapse onto one another, and listing them as separate rows would
+    # overstate how much independent comparison the audit actually performed.
+    equivalent_baselines: tuple[tuple[str, ...], ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -142,6 +146,9 @@ class AuditResult:
                 "held_out_unit_count": self.baselines["compiled"].bootstrap_unit_count,
             },
             "baselines": {name: self.baselines[name].to_dict() for name in sorted(self.baselines)},
+            "equivalent_baselines": [list(group) for group in self.equivalent_baselines],
+            "distinct_baseline_count": len(self.baselines)
+            - sum(len(group) - 1 for group in self.equivalent_baselines),
             "policy": self.policy.to_dict(),
             "notes": list(self.notes),
             "privacy": {"contains_raw_prompts": False},
@@ -879,6 +886,17 @@ def audit(
         and held_out_ci_upper <= max_quality_loss + 1e-12
     )
     return AuditResult(
+        equivalent_baselines=_equivalent_baselines(
+            {
+                "always-strongest": all_strongest,
+                "always-cheapest": all_cheapest,
+                "always-fastest": all_fastest,
+                "random": random_assignments,
+                "task-only": task_only,
+                "warm-only": warm_only,
+                "compiled": compiled,
+            }
+        ),
         objective=objective,
         max_quality_loss=max_quality_loss,
         seed=seed,
@@ -897,6 +915,24 @@ def audit(
         policy=policy,
         notes=notes,
     )
+
+
+def _equivalent_baselines(
+    assignments: Mapping[str, Mapping[str, str]],
+) -> tuple[tuple[str, ...], ...]:
+    """Group baselines whose per-prompt assignments are identical.
+
+    ``warm-only`` is constructed from ``always-strongest``, and on an all-local pool every
+    ``cost_usd`` is 0 so ``always-cheapest`` resolves to the same model too. Reporting such
+    rows as separate strategies would imply more independent comparison than took place, so
+    the audit states which names describe the same behaviour on this workload.
+    """
+
+    groups: dict[tuple[tuple[str, str], ...], list[str]] = {}
+    for name, mapping in assignments.items():
+        signature = tuple(sorted(mapping.items()))
+        groups.setdefault(signature, []).append(name)
+    return tuple(tuple(sorted(names)) for names in groups.values() if len(names) > 1)
 
 
 # Explicit aliases make the public surface easy to discover without duplicating logic.
