@@ -11,18 +11,43 @@
   <img alt="Status: alpha" src="https://img.shields.io/badge/Status-alpha-F59F00">
 </p>
 
-**Turn your own model results into an explainable router with an explicit quality-loss
-budget.** RouteFoundry audits a complete matrix of graded model responses, compares simple
-baselines, compiles a deterministic policy, and checks it once on held-out prompts. The
-core is local: it makes no model call, needs no API key, and sends no telemetry.
+**Find out which of your local models is actually good at what — measured on your hardware,
+in one command.** RouteFoundry runs an auto-gradable suite against the models you already
+have in Ollama, grades every answer deterministically, and reports accuracy per task type.
+No API key, no dataset to assemble, no LLM judge.
 
-RouteFoundry is an **auditor and policy compiler**, not an inference gateway. Bring results
-from the evaluator and runtime you already trust; take the resulting `router.json` to the
-runtime you already operate.
+On one Windows laptop, across 152 measured generations, **no model won every category**:
 
-## Try the workflow in 60 seconds
+| task type | deepseek-r1:1.5b (1.1 GB) | llama3.2:3b (2.0 GB) |
+|---|---:|---:|
+| arithmetic word problems | **10/12** | 2/12 |
+| structured extraction | 4/9 | **9/9** |
+| code output prediction | **5/6** | 3/6 |
+| median latency | 14.6 s | 1.6 s |
 
-From this source checkout:
+The 1.1 GB reasoning model is five times better at arithmetic than the 2 GB general model,
+less than half as good at extraction, and nine times slower. Size did not predict accuracy:
+the smallest model scored highest overall, the largest came third. Raw rows, conditions and
+limits: [benchmarks/laptop-4model-suite-v1](benchmarks/laptop-4model-suite-v1/).
+
+Your fleet is not this fleet, which is the point — run it and find out.
+
+```bash
+routefoundry autopilot --limit 12      # measure your installed models (minutes, not seconds)
+```
+
+RouteFoundry then goes one step further: it can audit that matrix against simple baselines
+and compile an explainable routing policy under an explicit quality-loss budget. It is an
+**auditor and policy compiler**, not an inference gateway — take the resulting `router.json`
+to the runtime you already operate. The core is local: no model call from the audit path,
+no API key, no telemetry.
+
+> **On the routing numbers specifically:** per-model accuracy above is reproducible. The
+> compiled router's *speed advantage* is not yet, and this project will not print one until
+> it is — see [docs/PRE_LAUNCH_FINDINGS.md](docs/PRE_LAUNCH_FINDINGS.md), where the failure
+> modes of our own headline are written down.
+
+## See the workflow instantly, without measuring anything
 
 ```bash
 uv sync
@@ -65,6 +90,28 @@ task-only, warm-only, compiled, and hindsight-oracle baselines. The oracle is ex
 non-deployable. With complete, gap-free trace ordering, latency can include supplied model
 load penalties and reports can count model switches. Without complete trace metadata,
 RouteFoundry marks residency metrics unavailable and applies no load or switch penalty.
+
+## Measure your own models
+
+`autopilot` discovers what you already have installed (it never pulls or deletes a model),
+runs the bundled 38-task suite against each, and writes the matrix the rest of the tool
+consumes:
+
+```bash
+routefoundry autopilot                       # every installed model, full suite
+routefoundry autopilot --limit 12            # a balanced subset, ~4x faster
+routefoundry autopilot --models llama3.2:3b,gemma:2b
+```
+
+It prints a duration estimate before starting, reports progress per generation, and is
+resumable: interrupt it and the next run reuses completed work. A second run refuses to
+share an output with a live one, because concurrent runs inflate each other's latencies.
+
+Every task is graded deterministically — exact number, exact string, JSON field, required
+substrings, or regex. Reasoning scratchpads (`<think>` blocks) and answer preambles are
+stripped before grading, so a reasoning model is scored on its answer rather than penalised
+for its format. That constraint is also the suite's boundary: it measures **verifiable
+short-answer ability**, not open-ended generation quality.
 
 ## Bring graded observations
 
