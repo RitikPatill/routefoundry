@@ -1,0 +1,257 @@
+{
+  "artifact_type": "routefoundry.ollama-profile",
+  "completed_at": "2026-08-03T22:48:26.138Z",
+  "host": {
+    "cpu": {
+      "logical_cores": 16,
+      "physical_cores": 12,
+      "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel"
+    },
+    "memory": {
+      "total_bytes": 16870006784
+    },
+    "platform": {
+      "machine": "AMD64",
+      "python_version": "3.11.15",
+      "release": "10",
+      "system": "Windows",
+      "version": "10.0.26200"
+    }
+  },
+  "measurement": {
+    "os_cache_condition": "OS-cache-uncontrolled",
+    "repeats_per_model": 3,
+    "residency_condition": "backend-non-resident"
+  },
+  "models": [
+    {
+      "details": {
+        "families": [
+          "llama"
+        ],
+        "family": "llama",
+        "format": "gguf",
+        "parameter_size": "3.2B",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+      "installed_size_bytes": 2019393189,
+      "model": "llama3.2:3b",
+      "observations": [
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:47:29.390Z",
+          "eval_count": 1,
+          "eval_duration_ms": 1.0,
+          "eval_duration_ns": 1000000,
+          "load_duration_ms": 5424.4875,
+          "load_duration_ns": 5424487500,
+          "prompt_eval_count": 29,
+          "prompt_eval_duration_ms": 962.0,
+          "prompt_eval_duration_ns": 962000000,
+          "repeat": 1,
+          "started_at": "2026-08-03T22:47:22.467Z",
+          "total_duration_ms": 6393.536,
+          "total_duration_ns": 6393536000
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:47:36.453Z",
+          "eval_count": 1,
+          "eval_duration_ms": 1.0,
+          "eval_duration_ns": 1000000,
+          "load_duration_ms": 5115.0699,
+          "load_duration_ns": 5115069900,
+          "prompt_eval_count": 29,
+          "prompt_eval_duration_ms": 1061.0,
+          "prompt_eval_duration_ns": 1061000000,
+          "repeat": 2,
+          "started_at": "2026-08-03T22:47:29.705Z",
+          "total_duration_ms": 6182.1788,
+          "total_duration_ns": 6182178800
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:47:43.965Z",
+          "eval_count": 1,
+          "eval_duration_ms": 1.0,
+          "eval_duration_ns": 1000000,
+          "load_duration_ms": 5124.6866,
+          "load_duration_ns": 5124686600,
+          "prompt_eval_count": 29,
+          "prompt_eval_duration_ms": 1098.0,
+          "prompt_eval_duration_ns": 1098000000,
+          "repeat": 3,
+          "started_at": "2026-08-03T22:47:36.667Z",
+          "total_duration_ms": 6228.1128,
+          "total_duration_ns": 6228112800
+        }
+      ],
+      "requested_name": "llama3.2:3b"
+    },
+    {
+      "details": {
+        "families": [
+          "qwen2"
+        ],
+        "family": "qwen2",
+        "format": "gguf",
+        "parameter_size": "1.8B",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "a42b25d8c10a841bd24724309898ae851466696a7d7f3a0a408b895538ccbc96",
+      "installed_size_bytes": 1117322599,
+      "model": "deepseek-r1:1.5b",
+      "observations": [
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:47:57.315Z",
+          "eval_count": 1,
+          "eval_duration_ms": 1.0,
+          "eval_duration_ns": 1000000,
+          "load_duration_ms": 12768.6507,
+          "load_duration_ns": 12768650700,
+          "prompt_eval_count": 7,
+          "prompt_eval_duration_ms": 137.0,
+          "prompt_eval_duration_ns": 137000000,
+          "repeat": 1,
+          "started_at": "2026-08-03T22:47:44.073Z",
+          "total_duration_ms": 12909.9255,
+          "total_duration_ns": 12909925500
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:47:59.349Z",
+          "eval_count": 1,
+          "eval_duration_ms": 1.0,
+          "eval_duration_ns": 1000000,
+          "load_duration_ms": 1350.389,
+          "load_duration_ns": 1350389000,
+          "prompt_eval_count": 7,
+          "prompt_eval_duration_ms": 142.0,
+          "prompt_eval_duration_ns": 142000000,
+          "repeat": 2,
+          "started_at": "2026-08-03T22:47:57.523Z",
+          "total_duration_ms": 1495.8883,
+          "total_duration_ns": 1495888300
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:48:04.398Z",
+          "eval_count": 1,
+          "eval_duration_ms": 2.0,
+          "eval_duration_ns": 2000000,
+          "load_duration_ms": 1344.7961,
+          "load_duration_ns": 1344796100,
+          "prompt_eval_count": 7,
+          "prompt_eval_duration_ms": 137.0,
+          "prompt_eval_duration_ns": 137000000,
+          "repeat": 3,
+          "started_at": "2026-08-03T22:48:02.505Z",
+          "total_duration_ms": 1485.8783,
+          "total_duration_ns": 1485878300
+        }
+      ],
+      "requested_name": "deepseek-r1:1.5b"
+    },
+    {
+      "details": {
+        "families": [
+          "gemma"
+        ],
+        "family": "gemma",
+        "format": "gguf",
+        "parameter_size": "3B",
+        "quantization_level": "Q4_0"
+      },
+      "digest": "b50d6c999e592ae4f79acae23b4feaefbdfceaa7cd366df2610e3072c052a160",
+      "installed_size_bytes": 1678456656,
+      "model": "gemma:2b",
+      "observations": [
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:48:14.375Z",
+          "eval_count": 1,
+          "eval_duration_ms": 3.0,
+          "eval_duration_ns": 3000000,
+          "load_duration_ms": 7735.7718,
+          "load_duration_ns": 7735771800,
+          "prompt_eval_count": 26,
+          "prompt_eval_duration_ms": 996.0,
+          "prompt_eval_duration_ns": 996000000,
+          "repeat": 1,
+          "started_at": "2026-08-03T22:48:05.137Z",
+          "total_duration_ms": 8753.7963,
+          "total_duration_ns": 8753796300
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:48:19.595Z",
+          "eval_count": 1,
+          "eval_duration_ms": 3.0,
+          "eval_duration_ns": 3000000,
+          "load_duration_ms": 2915.3437,
+          "load_duration_ns": 2915343700,
+          "prompt_eval_count": 26,
+          "prompt_eval_duration_ms": 1447.0,
+          "prompt_eval_duration_ns": 1447000000,
+          "repeat": 2,
+          "started_at": "2026-08-03T22:48:14.694Z",
+          "total_duration_ms": 4368.6501,
+          "total_duration_ns": 4368650100
+        },
+        {
+          "backend_reported": true,
+          "completed_at": "2026-08-03T22:48:25.922Z",
+          "eval_count": 1,
+          "eval_duration_ms": 2.0,
+          "eval_duration_ns": 2000000,
+          "load_duration_ms": 4158.1146,
+          "load_duration_ns": 4158114600,
+          "prompt_eval_count": 26,
+          "prompt_eval_duration_ms": 1315.0,
+          "prompt_eval_duration_ns": 1315000000,
+          "repeat": 3,
+          "started_at": "2026-08-03T22:48:19.995Z",
+          "total_duration_ms": 5488.1505,
+          "total_duration_ns": 5488150500
+        }
+      ],
+      "requested_name": "gemma:2b"
+    }
+  ],
+  "ollama": {
+    "version": "0.5.9",
+    "version_query_error": null
+  },
+  "protocol": {
+    "context_length": 2048,
+    "generated_text_recorded": false,
+    "num_predict": 1,
+    "profile_keep_alive": "5m",
+    "prompt_sha256": "43ec2ed7e4a09a05579219ce12af8d8dd4093f98ea82fc37ec4ee4dbea66b978",
+    "prompt_utf8_bytes": 14,
+    "raw_prompt_recorded": false,
+    "seed": 0,
+    "stream": false,
+    "temperature": 0,
+    "unload_keep_alive": 0
+  },
+  "residency_restore": {
+    "actions": [
+      {
+        "action": "unload",
+        "model": "gemma:2b"
+      }
+    ],
+    "additional_models": [],
+    "errors": [],
+    "expiry_deadlines_restored": false,
+    "final_models": [],
+    "initial_models": [],
+    "missing_models": [],
+    "status": "restored"
+  },
+  "schema_version": "1.0",
+  "started_at": "2026-08-03T22:47:22.461Z"
+}
