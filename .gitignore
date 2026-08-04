@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+.venv/
+venv/
+
+# Secrets and local authentication
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+token*.json
+auth_state/
+.huggingface/
+
+# Private/user data and large artifacts
+private/
+data/raw/
+data/private/
+datasets/cache/
+checkpoints/
+models/
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+browser_profile/
+
+# Generated reports and local profiling
+out/
+reports/
+*.local.json
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
